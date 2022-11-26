@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andlill.composedatetimepicker.ui.theme.ComposeDateTimePickerTheme
-import com.andlill.datepicker.DatePicker
+import com.andlill.datetimepicker.DatePicker
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

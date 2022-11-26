@@ -1,9 +1,9 @@
-package com.andlill.datepicker
+package com.andlill.datetimepicker
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun DatePicker() {
+fun TimePicker() {
     Text("Hello World")
 }
