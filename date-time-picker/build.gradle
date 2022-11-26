@@ -47,10 +47,8 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 from components.release
-
                 groupId = 'com.github.andreaslill'
                 artifactId = 'date-time-picker'
-                version = '0.1'
             }
         }
     }
