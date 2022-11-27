@@ -104,7 +104,7 @@ fun DatePickerDialog(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 internal fun DatePickerPager(dateSelected: LocalDate, onSelectDate: (LocalDate) -> Unit) {
-    val yearRange by remember { mutableStateOf(IntRange(1900, 2100)) }
+    val yearRange = remember { IntRange(1900, 2100) }
     val pageScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
         initialPage = (dateSelected.year - yearRange.first) * 12 + dateSelected.monthValue - 1
@@ -118,9 +118,6 @@ internal fun DatePickerPager(dateSelected: LocalDate, onSelectDate: (LocalDate) 
             pagerState.currentPage % 12 + 1,
             1
         )
-    }
-    val monthInfo = remember(dateViewed) {
-        dateViewed.getDatePickerMonthInfo()
     }
 
     DatePickerPagerHeader(
@@ -141,14 +138,9 @@ internal fun DatePickerPager(dateSelected: LocalDate, onSelectDate: (LocalDate) 
     DatePickerPagerBody(
         state = pagerState,
         pageCount = pageCount,
-        monthInfo = monthInfo,
-        viewedDate = dateViewed,
+        startYear = yearRange.first,
         selectedDate = dateSelected,
-        onClick = {
-            onSelectDate(
-                LocalDate.of(dateViewed.year, dateViewed.month, it)
-            )
-        }
+        onClick = onSelectDate
     )
 }
 
@@ -196,7 +188,7 @@ internal fun DatePickerPagerHeader(dateViewed: LocalDate, onPrevious: () -> Unit
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, monthInfo: Pair<Int, Int>, viewedDate: LocalDate, selectedDate: LocalDate, onClick: (Int) -> Unit) {
+internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, startYear: Int, selectedDate: LocalDate, onClick: (LocalDate) -> Unit) {
     val dayNames = remember { listOf("M", "T", "W", "T", "F", "S", "S") }
     val dateNow = remember { LocalDate.now() }
 
@@ -212,6 +204,16 @@ internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, monthInfo: P
             }
         }
         HorizontalPager(state = state, count = pageCount) { page ->
+            val pageDate = remember {
+                LocalDate.of(
+                    startYear + page / 12,
+                    page % 12 + 1,
+                    1
+                )
+            }
+            val monthInfo = remember {
+                pageDate.getDatePickerMonthInfo()
+            }
             LazyVerticalGrid(
                 userScrollEnabled = false,
                 columns = GridCells.Fixed(7),
@@ -219,24 +221,17 @@ internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, monthInfo: P
                     items(count = 42) { item ->
                         if (item >= monthInfo.first && (item - monthInfo.first) < monthInfo.second) {
                             DatePickerItem(
-                                modifier = Modifier.weight(1F),
                                 enabled = true,
-                                selected = (viewedDate.year == selectedDate.year && viewedDate.month == selectedDate.month && selectedDate.dayOfMonth == (item + 1 - monthInfo.first)),
-                                today = (viewedDate.year == dateNow.year && viewedDate.month == dateNow.month && dateNow.dayOfMonth == (item + 1 - monthInfo.first)),
+                                selected = (pageDate.year == selectedDate.year && pageDate.month == selectedDate.month && selectedDate.dayOfMonth == (item + 1 - monthInfo.first)),
+                                today = (pageDate.year == dateNow.year && pageDate.month == dateNow.month && dateNow.dayOfMonth == (item + 1 - monthInfo.first)),
                                 text = (item + 1 - monthInfo.first).toString(),
                                 onClick = {
-                                    onClick((item + 1 - monthInfo.first))
+                                    onClick(LocalDate.of(pageDate.year, pageDate.month, (item + 1 - monthInfo.first)))
                                 }
                             )
                         }
                         else {
-                            DatePickerItem(
-                                modifier = Modifier.weight(1F),
-                                enabled = false,
-                                text = "",
-                                onClick = {
-                                }
-                            )
+                            Box(modifier = Modifier.size(40.dp))
                         }
                     }
                 }
@@ -246,7 +241,7 @@ internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, monthInfo: P
 }
 
 @Composable
-internal fun DatePickerItem(modifier: Modifier, enabled: Boolean, selected: Boolean = false, today: Boolean = false, text: String, onClick: () -> Unit) {
+internal fun DatePickerItem(modifier: Modifier = Modifier, enabled: Boolean, selected: Boolean = false, today: Boolean = false, text: String, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
         modifier = modifier
@@ -266,7 +261,10 @@ internal fun DatePickerItem(modifier: Modifier, enabled: Boolean, selected: Bool
         color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
         content = {
             Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                Text(text = text)
+                Text(
+                    text = text,
+                    color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     )
