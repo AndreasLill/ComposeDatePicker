@@ -48,12 +48,10 @@ fun DatePickerDialog(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(32.dp)
                 ) {
-                    Column {
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                modifier = Modifier.align(Alignment.CenterStart),
+                                modifier = Modifier.padding(start = 16.dp).align(Alignment.CenterStart),
                                 text = dateSelected.toDateString("E, MMM d"),
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Normal,
@@ -72,9 +70,7 @@ fun DatePickerDialog(
                             )
                         }
                         Divider()
-                        Column(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp)) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
                             if (showPicker) {
                                 DatePickerPager(dateSelected) {
                                     dateSelected = it
@@ -84,9 +80,7 @@ fun DatePickerDialog(
                                 DatePickerTextField(dateSelected)
                             }
                         }
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
                             Row(modifier = Modifier.align(Alignment.CenterEnd)) {
                                 TextButton(
                                     onClick = {
@@ -162,6 +156,7 @@ internal fun DatePickerPagerHeader(dateViewed: LocalDate, onPrevious: () -> Unit
     Box(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.align(Alignment.CenterStart), verticalAlignment = Alignment.CenterVertically) {
             Text(
+                modifier = Modifier.padding(start = 16.dp),
                 text = dateViewed.toDateString("MMMM YYYY"),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -289,5 +284,5 @@ internal fun DatePickerItem(modifier: Modifier = Modifier, enabled: Boolean, sel
 
 @Composable
 internal fun DatePickerTextField(dateSelected: LocalDate) {
-
+    Text(dateSelected.toString())
 }
