@@ -9,8 +9,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,17 +47,29 @@ fun DatePickerDialog(
             content = {
                 Surface(
                     color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(32.dp)
                 ) {
                     Column {
                         Box(modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)) {
                             Text(
+                                modifier = Modifier.align(Alignment.CenterStart),
                                 text = dateSelected.toDateString("E, MMM d"),
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Normal,
                                 color = MaterialTheme.colorScheme.onSurface
+                            )
+                            IconButton(
+                                modifier = Modifier.align(Alignment.CenterEnd),
+                                onClick = {},
+                                content = {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Edit,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(0.8f)
+                                    )
+                                }
                             )
                         }
                         Divider()
@@ -152,13 +166,13 @@ internal fun DatePickerPagerHeader(dateViewed: LocalDate, onPrevious: () -> Unit
                 text = dateViewed.toDateString("MMMM YYYY"),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface.copy(0.6f)
+                color = MaterialTheme.colorScheme.onSurface.copy(0.8f)
             )
             Spacer(modifier = Modifier.width(4.dp))
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(0.6f)
+                tint = MaterialTheme.colorScheme.onSurface.copy(0.8f)
             )
         }
         Row(modifier = Modifier.align(Alignment.CenterEnd)) {
@@ -168,7 +182,7 @@ internal fun DatePickerPagerHeader(dateViewed: LocalDate, onPrevious: () -> Unit
                     Icon(
                         imageVector = Icons.Filled.NavigateBefore,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(0.6f)
+                        tint = MaterialTheme.colorScheme.onSurface.copy(0.8f)
                     )
                 }
             )
@@ -178,7 +192,7 @@ internal fun DatePickerPagerHeader(dateViewed: LocalDate, onPrevious: () -> Unit
                     Icon(
                         imageVector = Icons.Filled.NavigateNext,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(0.6f)
+                        tint = MaterialTheme.colorScheme.onSurface.copy(0.8f)
                     )
                 }
             )
@@ -263,7 +277,8 @@ internal fun DatePickerItem(modifier: Modifier = Modifier, enabled: Boolean, sel
             Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center) {
                 Text(
                     text = text,
-                    color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                    fontSize = 13.sp,
+                    color = if (selected) MaterialTheme.colorScheme.onPrimary else if (today) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
         }
