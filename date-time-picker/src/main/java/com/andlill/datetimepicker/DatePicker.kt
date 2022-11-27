@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.outlined.Edit
@@ -209,23 +208,26 @@ internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, startYear: I
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth()) {
             dayNames.forEach { item ->
-                DatePickerItem(
-                    modifier = Modifier.weight(1F),
-                    enabled = false,
-                    text = item,
-                    onClick = {}
-                )
+                Box(
+                    modifier = Modifier.weight(1F).size(40.dp),
+                    contentAlignment = Alignment.Center) {
+                    Text(
+                        text = item,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
         HorizontalPager(state = state, count = pageCount) { page ->
-            val pageDate = remember {
+            val pageDate = remember(page) {
                 LocalDate.of(
                     startYear + page / 12,
                     page % 12 + 1,
                     1
                 )
             }
-            val monthInfo = remember {
+            val monthInfo = remember(pageDate) {
                 pageDate.getDatePickerMonthInfo()
             }
             LazyVerticalGrid(
