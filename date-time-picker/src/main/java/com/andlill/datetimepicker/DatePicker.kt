@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -51,9 +52,11 @@ fun DatePickerDialog(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                modifier = Modifier.padding(start = 16.dp).align(Alignment.CenterStart),
+                                modifier = Modifier
+                                    .padding(start = 16.dp)
+                                    .align(Alignment.CenterStart),
                                 text = dateSelected.toDateString("E, MMM d"),
-                                fontSize = 24.sp,
+                                fontSize = 22.sp,
                                 fontWeight = FontWeight.Normal,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -69,7 +72,7 @@ fun DatePickerDialog(
                                 }
                             )
                         }
-                        Divider()
+                        Divider(modifier = Modifier.padding(bottom = 8.dp))
                         Column(modifier = Modifier.fillMaxWidth()) {
                             if (showPicker) {
                                 DatePickerPager(dateSelected) {
@@ -111,6 +114,7 @@ fun DatePickerDialog(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 internal fun DatePickerPager(dateSelected: LocalDate, onSelectDate: (LocalDate) -> Unit) {
+    var showYearPicker by remember { mutableStateOf(false) }
     val yearRange = remember { IntRange(1900, 2100) }
     val pageScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
@@ -140,34 +144,61 @@ internal fun DatePickerPager(dateSelected: LocalDate, onSelectDate: (LocalDate) 
                 if (pagerState.currentPage <= pagerState.pageCount)
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
             }
+        },
+        onToggleYearPicker = {
+            showYearPicker = !showYearPicker
         }
     )
-    DatePickerPagerBody(
-        state = pagerState,
-        pageCount = pageCount,
-        startYear = yearRange.first,
-        selectedDate = dateSelected,
-        onClick = onSelectDate
-    )
+    if (showYearPicker) {
+        DatePickerPagerYearPicker(
+            yearRange = yearRange,
+            dateSelected = dateSelected,
+            onSelectYear = { year ->
+                showYearPicker = false
+                onSelectDate(LocalDate.of(
+                    year,
+                    dateSelected.month,
+                    dateSelected.dayOfMonth
+                ))
+                pageScope.launch {
+                    pagerState.scrollToPage((year - yearRange.first) * 12 + dateSelected.monthValue - 1)
+                }
+            }
+        )
+    }
+    else {
+        DatePickerPagerBody(
+            state = pagerState,
+            pageCount = pageCount,
+            startYear = yearRange.first,
+            selectedDate = dateSelected,
+            onClick = onSelectDate
+        )
+    }
 }
 
 @Composable
-internal fun DatePickerPagerHeader(dateViewed: LocalDate, onPrevious: () -> Unit, onNext: () -> Unit) {
+internal fun DatePickerPagerHeader(dateViewed: LocalDate, onPrevious: () -> Unit, onNext: () -> Unit, onToggleYearPicker: () -> Unit) {
     Box(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.align(Alignment.CenterStart), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                modifier = Modifier.padding(start = 16.dp),
-                text = dateViewed.toDateString("MMMM YYYY"),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface.copy(0.8f)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                imageVector = Icons.Filled.ArrowDropDown,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(0.8f)
-            )
+            Button(
+                colors = ButtonDefaults.textButtonColors(),
+                onClick = onToggleYearPicker
+            ) {
+                Text(
+                    text = dateViewed.toDateString("MMMM yyyy"),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface.copy(0.8f)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(0.8f)
+                )
+            }
         }
         Row(modifier = Modifier.align(Alignment.CenterEnd)) {
             IconButton(
@@ -194,6 +225,34 @@ internal fun DatePickerPagerHeader(dateViewed: LocalDate, onPrevious: () -> Unit
     }
 }
 
+@Composable
+internal fun DatePickerPagerYearPicker(yearRange: IntRange, dateSelected: LocalDate, onSelectYear: (Int) -> Unit) {
+    val state = rememberLazyGridState(
+        initialFirstVisibleItemIndex = dateSelected.year - yearRange.first
+    )
+    LazyVerticalGrid(
+        state = state,
+        columns = GridCells.Fixed(3),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        content = {
+            items(count = yearRange.last - yearRange.first) { item ->
+                val value = remember(item) {
+                    (item + yearRange.first)
+                }
+                YearPickerItem(
+                    selected = (value == dateSelected.year),
+                    text = value.toString(),
+                    onClick = {
+                        onSelectYear(value)
+                    }
+                )
+            }
+        }
+    )
+}
+
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, startYear: Int, selectedDate: LocalDate, onClick: (LocalDate) -> Unit) {
@@ -204,7 +263,9 @@ internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, startYear: I
         Row(modifier = Modifier.fillMaxWidth()) {
             dayNames.forEach { item ->
                 Box(
-                    modifier = Modifier.weight(1F).size(40.dp),
+                    modifier = Modifier
+                        .weight(1F)
+                        .size(40.dp),
                     contentAlignment = Alignment.Center) {
                     Text(
                         text = item,
@@ -230,6 +291,7 @@ internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, startYear: I
                 columns = GridCells.Fixed(7),
                 content = {
                     items(count = 42) { item ->
+                        // TODO: Perhaps do 6 rows of items instead for performance?
                         if (item >= monthInfo.first && (item - monthInfo.first) < monthInfo.second) {
                             DatePickerItem(
                                 enabled = true,
@@ -251,11 +313,31 @@ internal fun DatePickerPagerBody(state: PagerState, pageCount: Int, startYear: I
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun DatePickerItem(modifier: Modifier = Modifier, enabled: Boolean, selected: Boolean = false, today: Boolean = false, text: String, onClick: () -> Unit) {
+internal fun YearPickerItem(selected: Boolean = false, text: String, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier.height(40.dp),
+        shape = RoundedCornerShape(32.dp),
+        color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        onClick = onClick,
+        content = {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = text,
+                    fontSize = 13.sp,
+                    color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    )
+}
+
+@Composable
+internal fun DatePickerItem(enabled: Boolean, selected: Boolean = false, today: Boolean = false, text: String, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
-        modifier = modifier
+        modifier = Modifier
             .then(
                 if (enabled) {
                     Modifier.clickable(
@@ -271,7 +353,7 @@ internal fun DatePickerItem(modifier: Modifier = Modifier, enabled: Boolean, sel
         border = if (today) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else BorderStroke(0.dp, Color.Transparent),
         color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
         content = {
-            Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.height(40.dp), contentAlignment = Alignment.Center) {
                 Text(
                     text = text,
                     fontSize = 13.sp,
