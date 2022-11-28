@@ -155,11 +155,6 @@ internal fun DatePickerPager(dateSelected: LocalDate, onSelectDate: (LocalDate) 
             dateSelected = dateSelected,
             onSelectYear = { year ->
                 showYearPicker = false
-                onSelectDate(LocalDate.of(
-                    year,
-                    dateSelected.month,
-                    dateSelected.dayOfMonth
-                ))
                 pageScope.launch {
                     pagerState.scrollToPage((year - yearRange.first) * 12 + dateSelected.monthValue - 1)
                 }
