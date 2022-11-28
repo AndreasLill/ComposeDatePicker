@@ -232,7 +232,7 @@ internal fun DatePickerPagerYearPicker(yearRange: IntRange, dateSelected: LocalD
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         content = {
-            items(count = yearRange.last - yearRange.first) { item ->
+            items(count = yearRange.last - yearRange.first + 1) { item ->
                 val value = remember(item) {
                     (item + yearRange.first)
                 }
