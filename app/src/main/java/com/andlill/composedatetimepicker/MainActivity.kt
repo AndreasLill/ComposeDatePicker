@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 DatePickerDialog(
                                     state = dateDialogState,
-                                    startDate = date.value,
+                                    initialDate = date.value,
                                     onSelectDate = {
                                         date.value = it
                                     }
