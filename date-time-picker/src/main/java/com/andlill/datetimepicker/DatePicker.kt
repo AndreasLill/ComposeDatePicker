@@ -52,18 +52,14 @@ fun DatePickerDialog(
     yearRange: IntRange = IntRange(1900, 2100),
     initialDate: LocalDate = LocalDate.now(),
     locale: Locale = Locale.getDefault(),
-    titleDatePattern: String = "EEE, MMM d",
-    yearPickerDatePattern: String = "MMMM yyyy",
-    textFieldDatePattern: String = "yyyy-MM-dd",
-    textFieldLabelText: String = "Date",
-    textFieldErrorText: String = "Invalid format.\nUse: yyyy-mm-dd",
+    colors: DatePickerColors = DatePickerDefaults.colors(),
+    strings: DatePickerStrings = DatePickerDefaults.strings(),
     onSelectDate: (LocalDate) -> Unit
 ) {
     if (state.value) {
 
         var dateSelected by remember { mutableStateOf(initialDate) }
         var showPicker by remember { mutableStateOf(true) }
-
         Dialog(
             onDismissRequest = { state.value = false },
             content = {
@@ -71,7 +67,7 @@ fun DatePickerDialog(
                     modifier = Modifier
                         .wrapContentSize()
                         .animateContentSize(),
-                    color = MaterialTheme.colorScheme.surface,
+                    color = colors.background,
                     shape = RoundedCornerShape(28.dp)
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
@@ -80,10 +76,10 @@ fun DatePickerDialog(
                                 modifier = Modifier
                                     .padding(start = 8.dp)
                                     .align(Alignment.CenterStart),
-                                text = dateSelected.toDateString(titleDatePattern, locale),
+                                text = dateSelected.toDateString(strings.titleDatePattern, locale),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = colors.title
                             )
                             IconButton(
                                 modifier = Modifier.align(Alignment.CenterEnd),
@@ -94,12 +90,12 @@ fun DatePickerDialog(
                                     Icon(
                                         imageVector = if (showPicker) Icons.Outlined.Edit else Icons.Outlined.CalendarToday,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurface.copy(0.8f)
+                                        tint = colors.editIcon
                                     )
                                 }
                             )
                         }
-                        Divider()
+                        Divider(color = colors.divider)
                         Column(modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp)) {
@@ -107,7 +103,8 @@ fun DatePickerDialog(
                                 DatePickerCalendar(
                                     dateSelected = dateSelected,
                                     locale = locale,
-                                    yearPickerDatePattern = yearPickerDatePattern,
+                                    colors = colors,
+                                    strings = strings,
                                     yearRange = yearRange,
                                     onSelectDate = {
                                         dateSelected = it
@@ -118,9 +115,8 @@ fun DatePickerDialog(
                                 DatePickerTextField(
                                     dateSelected = dateSelected,
                                     locale = locale,
-                                    datePattern = textFieldDatePattern,
-                                    labelText = textFieldLabelText,
-                                    errorText = textFieldErrorText,
+                                    colors = colors,
+                                    strings = strings,
                                     onSelectDate = {
                                         dateSelected = it
                                     }
@@ -132,21 +128,23 @@ fun DatePickerDialog(
                             .padding(top = 16.dp)) {
                             Row(modifier = Modifier.align(Alignment.CenterEnd)) {
                                 TextButton(
+                                    colors = colors.negativeButton,
                                     onClick = {
                                         state.value = false
                                     },
                                     content = {
-                                        Text(text = "Cancel")
+                                        Text(strings.negativeButtonText)
                                     }
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 TextButton(
+                                    colors = colors.positiveButton,
                                     onClick = {
                                         onSelectDate(dateSelected)
                                         state.value = false
                                     },
                                     content = {
-                                        Text(text = "OK")
+                                        Text(strings.positiveButtonText)
                                     }
                                 )
                             }
@@ -163,7 +161,8 @@ fun DatePickerDialog(
 internal fun DatePickerCalendar(
     dateSelected: LocalDate,
     locale: Locale,
-    yearPickerDatePattern: String,
+    colors: DatePickerColors,
+    strings: DatePickerStrings,
     yearRange: IntRange,
     onSelectDate: (LocalDate) -> Unit
 ) {
@@ -186,7 +185,8 @@ internal fun DatePickerCalendar(
     DatePickerCalendarHeader(
         dateViewed = dateViewed,
         locale = locale,
-        datePattern = yearPickerDatePattern,
+        colors = colors,
+        strings = strings,
         isShowYearPicker = showYearPicker,
         onPrevious = {
             scope.launch {
@@ -207,6 +207,7 @@ internal fun DatePickerCalendar(
     if (showYearPicker) {
         DatePickerCalendarYearPicker(
             yearRange = yearRange,
+            colors = colors,
             dateSelected = dateSelected,
             onSelectYear = { year ->
                 showYearPicker = false
@@ -223,6 +224,7 @@ internal fun DatePickerCalendar(
             startYear = yearRange.first,
             dateSelected = dateSelected,
             locale = locale,
+            colors = colors,
             onClick = onSelectDate
         )
     }
@@ -232,7 +234,8 @@ internal fun DatePickerCalendar(
 internal fun DatePickerCalendarHeader(
     dateViewed: LocalDate,
     locale: Locale,
-    datePattern: String,
+    colors: DatePickerColors,
+    strings: DatePickerStrings,
     isShowYearPicker: Boolean,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
@@ -245,17 +248,17 @@ internal fun DatePickerCalendarHeader(
                 onClick = onToggleYearPicker
             ) {
                 Text(
-                    text = dateViewed.toDateString(datePattern, locale),
+                    text = dateViewed.toDateString(strings.yearPickerDatePattern, locale),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = colors.yearPickerTitle
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     modifier = Modifier.size(20.dp),
                     imageVector = if (isShowYearPicker) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = colors.yearPickerTitle
                 )
             }
         }
@@ -267,7 +270,7 @@ internal fun DatePickerCalendarHeader(
                     Icon(
                         imageVector = Icons.Filled.NavigateBefore,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(if (isShowYearPicker) 0.5f else 1f)
+                        tint = colors.prevIcon.copy(if (isShowYearPicker) 0.5f else 1f)
                     )
                 }
             )
@@ -278,7 +281,7 @@ internal fun DatePickerCalendarHeader(
                     Icon(
                         imageVector = Icons.Filled.NavigateNext,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(if (isShowYearPicker) 0.5f else 1f)
+                        tint = colors.nextIcon.copy(if (isShowYearPicker) 0.5f else 1f)
                     )
                 }
             )
@@ -289,6 +292,7 @@ internal fun DatePickerCalendarHeader(
 @Composable
 internal fun DatePickerCalendarYearPicker(
     yearRange: IntRange,
+    colors: DatePickerColors,
     dateSelected: LocalDate,
     onSelectYear: (Int) -> Unit
 ) {
@@ -307,6 +311,7 @@ internal fun DatePickerCalendarYearPicker(
                     (item + yearRange.first)
                 }
                 YearPickerItem(
+                    colors = colors,
                     selected = (value == dateSelected.year),
                     text = value.toString(),
                     onClick = {
@@ -326,6 +331,7 @@ internal fun DatePickerCalendarBody(
     startYear: Int,
     dateSelected: LocalDate,
     locale: Locale,
+    colors: DatePickerColors,
     onClick: (LocalDate) -> Unit
 ) {
     val dateNow = remember { LocalDate.now() }
@@ -341,7 +347,7 @@ internal fun DatePickerCalendarBody(
                     Text(
                         text = WeekFields.of(locale).firstDayOfWeek.plus(day.toLong()).getDisplayName(TextStyle.NARROW, locale),
                         fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = colors.calendarWeekText
                     )
                 }
             }
@@ -367,6 +373,7 @@ internal fun DatePickerCalendarBody(
                     items(count = 37) { item ->
                         if (item >= monthInfo.first && (item - monthInfo.first) < monthInfo.second) {
                             DatePickerItem(
+                                colors = colors,
                                 enabled = true,
                                 selected = (pageDate.year == dateSelected.year && pageDate.month == dateSelected.month && dateSelected.dayOfMonth == (item + 1 - monthInfo.first)),
                                 today = (pageDate.year == dateNow.year && pageDate.month == dateNow.month && dateNow.dayOfMonth == (item + 1 - monthInfo.first)),
@@ -383,99 +390,26 @@ internal fun DatePickerCalendarBody(
     }
 }
 
-@Composable
-internal fun YearPickerItem(
-    selected: Boolean = false,
-    text: String,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .height(40.dp)
-            .background(
-                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                shape = RoundedCornerShape(40.dp),
-            )
-            .clip(
-                shape = RoundedCornerShape(40.dp)
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-        content = {
-            Text(
-                text = text,
-                fontSize = 13.sp,
-                color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-            )
-        }
-    )
-}
-
-@Composable
-internal fun DatePickerItem(
-    enabled: Boolean,
-    selected: Boolean = false,
-    today: Boolean = false,
-    text: String,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    Box(
-        modifier = Modifier
-            .height(40.dp)
-            .background(
-                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                shape = RoundedCornerShape(40.dp),
-            )
-            .border(
-                border = if (today) BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.primary
-                ) else BorderStroke(0.dp, Color.Transparent),
-                shape = RoundedCornerShape(40.dp),
-            )
-            .then(
-                if (enabled) {
-                    Modifier.clickable(
-                        interactionSource = interactionSource,
-                        indication = null,
-                        onClick = onClick
-                    )
-                } else
-                    Modifier
-            ),
-        contentAlignment = Alignment.Center,
-        content = {
-            Text(
-                text = text,
-                fontSize = 13.sp,
-                color = if (selected) MaterialTheme.colorScheme.onPrimary else if (today) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-            )
-        }
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DatePickerTextField(
     dateSelected: LocalDate,
     locale: Locale,
-    datePattern: String,
-    labelText: String,
-    errorText: String,
+    colors: DatePickerColors,
+    strings: DatePickerStrings,
     onSelectDate: (LocalDate) -> Unit
 ) {
     val textFieldValue = remember {
         mutableStateOf(
             TextFieldValue(
-                text = dateSelected.toDateString(datePattern, locale),
+                text = dateSelected.toDateString(strings.textFieldDatePattern, locale),
                 selection = TextRange(Int.MAX_VALUE)
             )
         )
     }
     val parsedDate = remember(textFieldValue.value.text) {
         try {
-            LocalDate.parse(textFieldValue.value.text, DateTimeFormatter.ofPattern(datePattern))
+            LocalDate.parse(textFieldValue.value.text, DateTimeFormatter.ofPattern(strings.textFieldDatePattern))
         }
         catch (_: DateTimeParseException) {
             null
@@ -496,22 +430,94 @@ internal fun DatePickerTextField(
 
     OutlinedTextField(
         modifier = Modifier.focusRequester(focusRequester),
+        colors = colors.textFieldColors,
         label = {
-            Text(labelText)
+            Text(strings.textFieldLabelText)
         },
         placeholder = {
-            Text(datePattern)
+            Text(strings.textFieldDatePattern)
         },
         isError = isValidationError,
         supportingText = {
             if (isValidationError)
-                Text(errorText)
+                Text(strings.textFieldErrorText)
         },
         singleLine = true,
         maxLines = 1,
         value = textFieldValue.value,
         onValueChange = {
             textFieldValue.value = it
+        }
+    )
+}
+
+@Composable
+internal fun YearPickerItem(
+    colors: DatePickerColors,
+    selected: Boolean = false,
+    text: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .height(40.dp)
+            .background(
+                color = if (selected) colors.yearPickerSelectedBackground else Color.Transparent,
+                shape = RoundedCornerShape(40.dp),
+            )
+            .clip(
+                shape = RoundedCornerShape(40.dp)
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+        content = {
+            Text(
+                text = text,
+                fontSize = 13.sp,
+                color = if (selected) colors.yearPickerSelectedText else colors.yearPickerText
+            )
+        }
+    )
+}
+
+@Composable
+internal fun DatePickerItem(
+    colors: DatePickerColors,
+    enabled: Boolean,
+    selected: Boolean = false,
+    today: Boolean = false,
+    text: String,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Box(
+        modifier = Modifier
+            .height(40.dp)
+            .background(
+                color = if (selected) colors.calendarDaySelectedBackground else Color.Transparent,
+                shape = RoundedCornerShape(40.dp),
+            )
+            .border(
+                border = if (today) BorderStroke(1.dp, colors.calendarDayTodayBorder) else BorderStroke(0.dp, Color.Transparent),
+                shape = RoundedCornerShape(40.dp),
+            )
+            .then(
+                if (enabled) {
+                    Modifier.clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = onClick
+                    )
+                } else
+                    Modifier
+            ),
+        contentAlignment = Alignment.Center,
+        content = {
+            Text(
+                text = text,
+                fontSize = 13.sp,
+                color = if (selected) colors.calendarDaySelectedText else if (today) colors.calendarDayTodayText else colors.calendarDayText
+            )
         }
     )
 }
