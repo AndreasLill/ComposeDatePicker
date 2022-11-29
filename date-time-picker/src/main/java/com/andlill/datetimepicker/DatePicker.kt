@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.andlill.datetimepicker.TimeUtils.getDatePickerMonthInfo
 import com.andlill.datetimepicker.TimeUtils.toDateString
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -49,6 +50,7 @@ import java.util.Locale
 @Composable
 fun DatePickerDialog(
     state: MutableState<Boolean>,
+    properties: DialogProperties = DialogProperties(),
     yearRange: IntRange = IntRange(1900, 2100),
     initialDate: LocalDate = LocalDate.now(),
     locale: Locale = Locale.getDefault(),
@@ -61,6 +63,7 @@ fun DatePickerDialog(
         var dateSelected by remember { mutableStateOf(initialDate) }
         var showPicker by remember { mutableStateOf(true) }
         Dialog(
+            properties = properties,
             onDismissRequest = { state.value = false },
             content = {
                 Surface(
