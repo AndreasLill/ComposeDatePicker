@@ -520,7 +520,7 @@ internal fun CalendarItem(
                 .border(
                     border = if (today) BorderStroke(
                         1.dp,
-                        colors.calendarSelectedText
+                        colors.calendarSelectedBackground
                     ) else BorderStroke(0.dp, Color.Transparent),
                     shape = RoundedCornerShape(size),
                 )
@@ -539,7 +539,7 @@ internal fun CalendarItem(
                 Text(
                     text = text,
                     fontSize = 13.sp,
-                    color = if (selected) colors.calendarSelectedText else if (today) colors.calendarSelectedText else colors.calendarText
+                    color = if (selected) colors.calendarSelectedText else if (today) colors.calendarSelectedBackground else colors.calendarText
                 )
             }
         )
