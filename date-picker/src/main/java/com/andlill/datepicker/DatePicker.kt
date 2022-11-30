@@ -55,7 +55,7 @@ fun DatePickerDialog(
     properties: DialogProperties = DialogProperties(),
     yearRange: IntRange = IntRange(1900, 2100),
     initialDate: LocalDate = LocalDate.now(),
-    locale: Locale = Locale.UK,
+    locale: Locale = Locale.getDefault(),
     colors: DatePickerColors = DatePickerDefaults.colors(),
     strings: DatePickerStrings = DatePickerDefaults.strings(),
     onSelectDate: (LocalDate) -> Unit
