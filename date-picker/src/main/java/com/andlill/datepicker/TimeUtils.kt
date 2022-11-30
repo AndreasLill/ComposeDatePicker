@@ -1,8 +1,7 @@
-package com.andlill.datetimepicker
+package com.andlill.datepicker
 
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.*
@@ -10,11 +9,6 @@ import java.util.*
 object TimeUtils {
 
     fun LocalDate.toDateString(pattern: String, locale: Locale): String {
-        val formatter = DateTimeFormatter.ofPattern(pattern).withLocale(locale)
-        return this.format(formatter)
-    }
-
-    fun LocalTime.toTimeString(pattern: String, locale: Locale): String {
         val formatter = DateTimeFormatter.ofPattern(pattern).withLocale(locale)
         return this.format(formatter)
     }

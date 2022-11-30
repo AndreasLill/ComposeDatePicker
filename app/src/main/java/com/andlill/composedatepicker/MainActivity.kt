@@ -1,4 +1,4 @@
-package com.andlill.composedatetimepicker
+package com.andlill.composedatepicker
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,8 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.andlill.composedatetimepicker.ui.theme.ComposeDateTimePickerTheme
-import com.andlill.datetimepicker.DatePickerDialog
+import com.andlill.composedatepicker.ui.theme.ComposeDateTimePickerTheme
+import com.andlill.datepicker.DatePickerDialog
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {

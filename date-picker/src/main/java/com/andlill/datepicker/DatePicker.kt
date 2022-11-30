@@ -1,4 +1,4 @@
-package com.andlill.datetimepicker
+package com.andlill.datepicker
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
@@ -33,8 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.andlill.datetimepicker.TimeUtils.getDatePickerMonthInfo
-import com.andlill.datetimepicker.TimeUtils.toDateString
+import com.andlill.datepicker.TimeUtils.getDatePickerMonthInfo
+import com.andlill.datepicker.TimeUtils.toDateString
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState

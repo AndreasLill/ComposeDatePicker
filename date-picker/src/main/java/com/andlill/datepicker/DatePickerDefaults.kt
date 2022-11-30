@@ -1,4 +1,4 @@
-package com.andlill.datetimepicker
+package com.andlill.datepicker
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable

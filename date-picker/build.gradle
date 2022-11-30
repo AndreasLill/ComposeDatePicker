@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace 'com.andlill.datetimepicker'
+    namespace 'com.andlill.datepicker'
     compileSdk 33
 
     defaultConfig {
@@ -54,7 +54,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 groupId = 'com.github.andreaslill'
-                artifactId = 'date-time-picker'
+                artifactId = 'date-picker'
             }
         }
     }

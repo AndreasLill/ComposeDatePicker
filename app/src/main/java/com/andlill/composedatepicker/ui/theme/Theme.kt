@@ -1,4 +1,4 @@
-package com.andlill.composedatetimepicker.ui.theme
+package com.andlill.composedatepicker.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
