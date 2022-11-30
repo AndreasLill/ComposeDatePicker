@@ -1,6 +1,5 @@
 package com.andlill.datepicker
 
-import android.content.res.Configuration
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -63,8 +62,8 @@ fun DatePickerDialog(
 ) {
     if (state.value) {
         val config = LocalConfiguration.current
-        val isPortrait = remember {
-            config.orientation == Configuration.ORIENTATION_PORTRAIT
+        val screenSize = remember(config.orientation) {
+            Pair(config.screenWidthDp, config.screenHeightDp)
         }
         var dateSelected by remember { mutableStateOf(initialDate) }
         var showPicker by remember { mutableStateOf(true) }
@@ -80,7 +79,7 @@ fun DatePickerDialog(
                     shape = RoundedCornerShape(28.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        if (isPortrait) {
+                        if (screenSize.second >= 560) {
                             Box(modifier = Modifier.fillMaxWidth()) {
                                 Text(
                                     modifier = Modifier
@@ -113,7 +112,7 @@ fun DatePickerDialog(
                         Column(modifier = Modifier.fillMaxWidth()) {
                             if (showPicker) {
                                 DatePickerCalendar(
-                                    isPortrait = isPortrait,
+                                    screenSize = screenSize,
                                     dateSelected = dateSelected,
                                     locale = locale,
                                     colors = colors,
@@ -172,7 +171,7 @@ fun DatePickerDialog(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 internal fun DatePickerCalendar(
-    isPortrait: Boolean,
+    screenSize: Pair<Int, Int>,
     dateSelected: LocalDate,
     locale: Locale,
     colors: DatePickerColors,
@@ -220,7 +219,7 @@ internal fun DatePickerCalendar(
     )
     if (showYearPicker) {
         DatePickerCalendarYearPicker(
-            isPortrait = isPortrait,
+            screenSize = screenSize,
             yearRange = yearRange,
             colors = colors,
             dateSelected = dateSelected,
@@ -234,7 +233,7 @@ internal fun DatePickerCalendar(
     }
     else {
         DatePickerCalendarBody(
-            isPortrait = isPortrait,
+            screenSize = screenSize,
             state = pagerState,
             pageCount = pageCount,
             startYear = yearRange.first,
@@ -307,7 +306,7 @@ internal fun DatePickerCalendarHeader(
 
 @Composable
 internal fun DatePickerCalendarYearPicker(
-    isPortrait: Boolean,
+    screenSize: Pair<Int, Int>,
     yearRange: IntRange,
     colors: DatePickerColors,
     dateSelected: LocalDate,
@@ -317,7 +316,7 @@ internal fun DatePickerCalendarYearPicker(
         initialFirstVisibleItemIndex = dateSelected.year - yearRange.first
     )
     LazyVerticalGrid(
-        modifier = Modifier.height(if (isPortrait) 280.dp else 210.dp),
+        modifier = Modifier.height(if (screenSize.second >= 560) 280.dp else 210.dp),
         state = state,
         columns = GridCells.Fixed(3),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -343,7 +342,7 @@ internal fun DatePickerCalendarYearPicker(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 internal fun DatePickerCalendarBody(
-    isPortrait: Boolean,
+    screenSize: Pair<Int, Int>,
     state: PagerState,
     pageCount: Int,
     startYear: Int,
@@ -360,7 +359,7 @@ internal fun DatePickerCalendarBody(
                 Box(
                     modifier = Modifier
                         .weight(1F)
-                        .size(if (isPortrait) 40.dp else 30.dp),
+                        .size(if (screenSize.second >= 560) 40.dp else 30.dp),
                     contentAlignment = Alignment.Center) {
                     Text(
                         text = WeekFields.of(locale).firstDayOfWeek.plus(day.toLong()).getDisplayName(TextStyle.NARROW, locale),
@@ -382,7 +381,7 @@ internal fun DatePickerCalendarBody(
                 pageDate.getDatePickerMonthInfo(locale)
             }
             LazyVerticalGrid(
-                modifier = Modifier.height(if (isPortrait) 240.dp else 180.dp),
+                modifier = Modifier.height(if (screenSize.second >= 560) 240.dp else 180.dp),
                 userScrollEnabled = false,
                 columns = GridCells.Fixed(7),
                 content = {
@@ -396,7 +395,7 @@ internal fun DatePickerCalendarBody(
                                 selected = (pageDate.year == dateSelected.year && pageDate.month == dateSelected.month && dateSelected.dayOfMonth == (item + 1 - monthInfo.first)),
                                 today = (pageDate.year == dateNow.year && pageDate.month == dateNow.month && dateNow.dayOfMonth == (item + 1 - monthInfo.first)),
                                 text = (item + 1 - monthInfo.first).toString(),
-                                size = if (isPortrait) 40.dp else 30.dp,
+                                size = if (screenSize.second >= 560) 40.dp else 30.dp,
                                 onClick = {
                                     onClick(LocalDate.of(pageDate.year, pageDate.month, (item + 1 - monthInfo.first)))
                                 }
