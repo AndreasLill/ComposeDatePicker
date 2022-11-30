@@ -1,5 +1,6 @@
 package com.andlill.datepicker
 
+import android.content.res.Configuration
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -26,9 +27,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -45,7 +48,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
-import java.util.Locale
+import java.util.*
 
 @Composable
 fun DatePickerDialog(
@@ -53,13 +56,16 @@ fun DatePickerDialog(
     properties: DialogProperties = DialogProperties(),
     yearRange: IntRange = IntRange(1900, 2100),
     initialDate: LocalDate = LocalDate.now(),
-    locale: Locale = Locale.getDefault(),
+    locale: Locale = Locale.UK,
     colors: DatePickerColors = DatePickerDefaults.colors(),
     strings: DatePickerStrings = DatePickerDefaults.strings(),
     onSelectDate: (LocalDate) -> Unit
 ) {
     if (state.value) {
-
+        val config = LocalConfiguration.current
+        val isPortrait = remember {
+            config.orientation == Configuration.ORIENTATION_PORTRAIT
+        }
         var dateSelected by remember { mutableStateOf(initialDate) }
         var showPicker by remember { mutableStateOf(true) }
         Dialog(
@@ -73,37 +79,41 @@ fun DatePickerDialog(
                     color = colors.background,
                     shape = RoundedCornerShape(28.dp)
                 ) {
-                    Column(modifier = Modifier.padding(24.dp)) {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 8.dp)
-                                    .align(Alignment.CenterStart),
-                                text = dateSelected.toDateString(strings.titleDatePattern, locale),
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = colors.title
-                            )
-                            IconButton(
-                                modifier = Modifier.align(Alignment.CenterEnd),
-                                onClick = {
-                                    showPicker = !showPicker
-                                },
-                                content = {
-                                    Icon(
-                                        imageVector = if (showPicker) Icons.Outlined.Edit else Icons.Outlined.CalendarToday,
-                                        contentDescription = null,
-                                        tint = colors.icon
-                                    )
-                                }
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        if (isPortrait) {
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(start = 8.dp)
+                                        .align(Alignment.CenterStart),
+                                    text = dateSelected.toDateString(strings.titleDatePattern, locale),
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = colors.title
+                                )
+                                IconButton(
+                                    modifier = Modifier.align(Alignment.CenterEnd),
+                                    onClick = {
+                                        showPicker = !showPicker
+                                    },
+                                    content = {
+                                        Icon(
+                                            imageVector = if (showPicker) Icons.Outlined.Edit else Icons.Outlined.CalendarToday,
+                                            contentDescription = null,
+                                            tint = colors.icon
+                                        )
+                                    }
+                                )
+                            }
+                            Divider(
+                                modifier = Modifier.padding(bottom = 8.dp),
+                                color = colors.divider
                             )
                         }
-                        Divider(color = colors.divider)
-                        Column(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
                             if (showPicker) {
                                 DatePickerCalendar(
+                                    isPortrait = isPortrait,
                                     dateSelected = dateSelected,
                                     locale = locale,
                                     colors = colors,
@@ -128,7 +138,7 @@ fun DatePickerDialog(
                         }
                         Box(modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp)) {
+                            .padding(top = 8.dp)) {
                             Row(modifier = Modifier.align(Alignment.CenterEnd)) {
                                 TextButton(
                                     colors = colors.negativeButton,
@@ -162,6 +172,7 @@ fun DatePickerDialog(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 internal fun DatePickerCalendar(
+    isPortrait: Boolean,
     dateSelected: LocalDate,
     locale: Locale,
     colors: DatePickerColors,
@@ -209,6 +220,7 @@ internal fun DatePickerCalendar(
     )
     if (showYearPicker) {
         DatePickerCalendarYearPicker(
+            isPortrait = isPortrait,
             yearRange = yearRange,
             colors = colors,
             dateSelected = dateSelected,
@@ -222,6 +234,7 @@ internal fun DatePickerCalendar(
     }
     else {
         DatePickerCalendarBody(
+            isPortrait = isPortrait,
             state = pagerState,
             pageCount = pageCount,
             startYear = yearRange.first,
@@ -294,6 +307,7 @@ internal fun DatePickerCalendarHeader(
 
 @Composable
 internal fun DatePickerCalendarYearPicker(
+    isPortrait: Boolean,
     yearRange: IntRange,
     colors: DatePickerColors,
     dateSelected: LocalDate,
@@ -303,9 +317,9 @@ internal fun DatePickerCalendarYearPicker(
         initialFirstVisibleItemIndex = dateSelected.year - yearRange.first
     )
     LazyVerticalGrid(
+        modifier = Modifier.height(if (isPortrait) 280.dp else 210.dp),
         state = state,
         columns = GridCells.Fixed(3),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         content = {
@@ -329,6 +343,7 @@ internal fun DatePickerCalendarYearPicker(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 internal fun DatePickerCalendarBody(
+    isPortrait: Boolean,
     state: PagerState,
     pageCount: Int,
     startYear: Int,
@@ -345,7 +360,7 @@ internal fun DatePickerCalendarBody(
                 Box(
                     modifier = Modifier
                         .weight(1F)
-                        .size(40.dp),
+                        .size(if (isPortrait) 40.dp else 30.dp),
                     contentAlignment = Alignment.Center) {
                     Text(
                         text = WeekFields.of(locale).firstDayOfWeek.plus(day.toLong()).getDisplayName(TextStyle.NARROW, locale),
@@ -367,7 +382,7 @@ internal fun DatePickerCalendarBody(
                 pageDate.getDatePickerMonthInfo(locale)
             }
             LazyVerticalGrid(
-                modifier = Modifier.height(240.dp),
+                modifier = Modifier.height(if (isPortrait) 240.dp else 180.dp),
                 userScrollEnabled = false,
                 columns = GridCells.Fixed(7),
                 content = {
@@ -381,6 +396,7 @@ internal fun DatePickerCalendarBody(
                                 selected = (pageDate.year == dateSelected.year && pageDate.month == dateSelected.month && dateSelected.dayOfMonth == (item + 1 - monthInfo.first)),
                                 today = (pageDate.year == dateNow.year && pageDate.month == dateNow.month && dateNow.dayOfMonth == (item + 1 - monthInfo.first)),
                                 text = (item + 1 - monthInfo.first).toString(),
+                                size = if (isPortrait) 40.dp else 30.dp,
                                 onClick = {
                                     onClick(LocalDate.of(pageDate.year, pageDate.month, (item + 1 - monthInfo.first)))
                                 }
@@ -490,37 +506,43 @@ internal fun CalendarItem(
     selected: Boolean = false,
     today: Boolean = false,
     text: String,
+    size: Dp,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    Box(
-        modifier = Modifier
-            .height(40.dp)
-            .background(
-                color = if (selected) colors.calendarSelectedBackground else Color.Transparent,
-                shape = RoundedCornerShape(40.dp),
-            )
-            .border(
-                border = if (today) BorderStroke(1.dp, colors.calendarSelectedText) else BorderStroke(0.dp, Color.Transparent),
-                shape = RoundedCornerShape(40.dp),
-            )
-            .then(
-                if (enabled) {
-                    Modifier.clickable(
-                        interactionSource = interactionSource,
-                        indication = null,
-                        onClick = onClick
-                    )
-                } else
-                    Modifier
-            ),
-        contentAlignment = Alignment.Center,
-        content = {
-            Text(
-                text = text,
-                fontSize = 13.sp,
-                color = if (selected) colors.calendarSelectedText else if (today) colors.calendarSelectedText else colors.calendarText
-            )
-        }
-    )
+    Box(contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .size(size)
+                .background(
+                    color = if (selected) colors.calendarSelectedBackground else Color.Transparent,
+                    shape = RoundedCornerShape(size),
+                )
+                .border(
+                    border = if (today) BorderStroke(
+                        1.dp,
+                        colors.calendarSelectedText
+                    ) else BorderStroke(0.dp, Color.Transparent),
+                    shape = RoundedCornerShape(size),
+                )
+                .then(
+                    if (enabled) {
+                        Modifier.clickable(
+                            interactionSource = interactionSource,
+                            indication = null,
+                            onClick = onClick
+                        )
+                    } else
+                        Modifier
+                ),
+            contentAlignment = Alignment.Center,
+            content = {
+                Text(
+                    text = text,
+                    fontSize = 13.sp,
+                    color = if (selected) colors.calendarSelectedText else if (today) colors.calendarSelectedText else colors.calendarText
+                )
+            }
+        )
+    }
 }
