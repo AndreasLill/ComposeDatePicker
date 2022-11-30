@@ -93,7 +93,7 @@ fun DatePickerDialog(
                                     Icon(
                                         imageVector = if (showPicker) Icons.Outlined.Edit else Icons.Outlined.CalendarToday,
                                         contentDescription = null,
-                                        tint = colors.editIcon
+                                        tint = colors.icon
                                     )
                                 }
                             )
@@ -254,14 +254,14 @@ internal fun DatePickerCalendarHeader(
                     text = dateViewed.toDateString(strings.yearPickerDatePattern, locale),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = colors.yearPickerTitle
+                    color = colors.calendarYearPicker
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     modifier = Modifier.size(20.dp),
                     imageVector = if (isShowYearPicker) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
                     contentDescription = null,
-                    tint = colors.yearPickerTitle
+                    tint = colors.calendarYearPicker
                 )
             }
         }
@@ -273,7 +273,7 @@ internal fun DatePickerCalendarHeader(
                     Icon(
                         imageVector = Icons.Filled.NavigateBefore,
                         contentDescription = null,
-                        tint = colors.prevIcon.copy(if (isShowYearPicker) 0.5f else 1f)
+                        tint = colors.icon.copy(if (isShowYearPicker) 0.5f else 1f)
                     )
                 }
             )
@@ -284,7 +284,7 @@ internal fun DatePickerCalendarHeader(
                     Icon(
                         imageVector = Icons.Filled.NavigateNext,
                         contentDescription = null,
-                        tint = colors.nextIcon.copy(if (isShowYearPicker) 0.5f else 1f)
+                        tint = colors.icon.copy(if (isShowYearPicker) 0.5f else 1f)
                     )
                 }
             )
@@ -375,7 +375,7 @@ internal fun DatePickerCalendarBody(
                     // Largest count is starting on final day of week and 31 days. (ex. Jan 2023)
                     items(count = 37) { item ->
                         if (item >= monthInfo.first && (item - monthInfo.first) < monthInfo.second) {
-                            DatePickerItem(
+                            CalendarItem(
                                 colors = colors,
                                 enabled = true,
                                 selected = (pageDate.year == dateSelected.year && pageDate.month == dateSelected.month && dateSelected.dayOfMonth == (item + 1 - monthInfo.first)),
@@ -465,7 +465,7 @@ internal fun YearPickerItem(
         modifier = Modifier
             .height(40.dp)
             .background(
-                color = if (selected) colors.yearPickerSelectedBackground else Color.Transparent,
+                color = if (selected) colors.calendarSelectedBackground else Color.Transparent,
                 shape = RoundedCornerShape(40.dp),
             )
             .clip(
@@ -477,14 +477,14 @@ internal fun YearPickerItem(
             Text(
                 text = text,
                 fontSize = 13.sp,
-                color = if (selected) colors.yearPickerSelectedText else colors.yearPickerText
+                color = if (selected) colors.calendarSelectedText else colors.calendarText
             )
         }
     )
 }
 
 @Composable
-internal fun DatePickerItem(
+internal fun CalendarItem(
     colors: DatePickerColors,
     enabled: Boolean,
     selected: Boolean = false,
@@ -497,11 +497,11 @@ internal fun DatePickerItem(
         modifier = Modifier
             .height(40.dp)
             .background(
-                color = if (selected) colors.calendarDaySelectedBackground else Color.Transparent,
+                color = if (selected) colors.calendarSelectedBackground else Color.Transparent,
                 shape = RoundedCornerShape(40.dp),
             )
             .border(
-                border = if (today) BorderStroke(1.dp, colors.calendarDayTodayBorder) else BorderStroke(0.dp, Color.Transparent),
+                border = if (today) BorderStroke(1.dp, colors.calendarSelectedText) else BorderStroke(0.dp, Color.Transparent),
                 shape = RoundedCornerShape(40.dp),
             )
             .then(
@@ -519,7 +519,7 @@ internal fun DatePickerItem(
             Text(
                 text = text,
                 fontSize = 13.sp,
-                color = if (selected) colors.calendarDaySelectedText else if (today) colors.calendarDayTodayText else colors.calendarDayText
+                color = if (selected) colors.calendarSelectedText else if (today) colors.calendarSelectedText else colors.calendarText
             )
         }
     )
