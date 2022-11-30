@@ -1,5 +1,5 @@
 # Compose Date Picker
-A simple light-weight and customizable `material3` date and time picker library for jetpack compose.
+A simple light-weight and customizable `material3` date picker library for jetpack compose.
 
 As of jetpack compose material3 version 1.1.0, a date picker does not yet exist.
 This libary aims to add it until the official material date picker is released by google.
