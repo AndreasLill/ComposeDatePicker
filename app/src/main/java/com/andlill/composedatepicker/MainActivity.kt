@@ -11,7 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.andlill.composedatepicker.ui.theme.ComposeDateTimePickerTheme
@@ -23,8 +23,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ComposeDateTimePickerTheme {
-                val dateDialogState = remember { mutableStateOf(false) }
-                val date = remember { mutableStateOf(LocalDate.now()) }
+                val dateDialogState = rememberSaveable { mutableStateOf(false) }
+                val date = rememberSaveable { mutableStateOf(LocalDate.now()) }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,

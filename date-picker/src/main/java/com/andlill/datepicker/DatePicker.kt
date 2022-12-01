@@ -1,10 +1,7 @@
 package com.andlill.datepicker
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -20,12 +17,14 @@ import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -34,7 +33,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.andlill.datepicker.TimeUtils.getDatePickerMonthInfo
 import com.andlill.datepicker.TimeUtils.toDateString
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -52,7 +50,6 @@ import java.util.*
 @Composable
 fun DatePickerDialog(
     state: MutableState<Boolean>,
-    properties: DialogProperties = DialogProperties(),
     yearRange: IntRange = IntRange(1900, 2100),
     initialDate: LocalDate = LocalDate.now(),
     locale: Locale = Locale.getDefault(),
@@ -62,13 +59,13 @@ fun DatePickerDialog(
 ) {
     if (state.value) {
         val config = LocalConfiguration.current
-        val screenSize = remember(config.orientation) {
-            Pair(config.screenWidthDp, config.screenHeightDp)
+        val isScreenSmallHeight = remember(config.orientation) {
+            config.screenHeightDp < 500
         }
-        var dateSelected by remember { mutableStateOf(initialDate) }
-        var showPicker by remember { mutableStateOf(true) }
+        var dateSelected by rememberSaveable { mutableStateOf(initialDate) }
+        var isCalendar by rememberSaveable { mutableStateOf(true) }
+
         Dialog(
-            properties = properties,
             onDismissRequest = { state.value = false },
             content = {
                 Surface(
@@ -78,41 +75,32 @@ fun DatePickerDialog(
                     color = colors.background,
                     shape = RoundedCornerShape(28.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        if (screenSize.second >= 560) {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    modifier = Modifier
-                                        .padding(start = 8.dp)
-                                        .align(Alignment.CenterStart),
-                                    text = dateSelected.toDateString(strings.titleDatePattern, locale),
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = colors.title
-                                )
-                                IconButton(
-                                    modifier = Modifier.align(Alignment.CenterEnd),
-                                    onClick = {
-                                        showPicker = !showPicker
-                                    },
-                                    content = {
-                                        Icon(
-                                            imageVector = if (showPicker) Icons.Outlined.Edit else Icons.Outlined.CalendarToday,
-                                            contentDescription = null,
-                                            tint = colors.icon
-                                        )
-                                    }
-                                )
-                            }
+                    Column(modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = if (isScreenSmallHeight) 8.dp else 16.dp,
+                        bottom =  if (isScreenSmallHeight) 8.dp else 16.dp)
+                    ) {
+                        if (!isScreenSmallHeight) {
+                            DatePickerHeader(
+                                dateSelected = dateSelected,
+                                locale = locale,
+                                colors = colors,
+                                strings = strings,
+                                isCalendar = isCalendar,
+                                onEdit = {
+                                    isCalendar = !isCalendar
+                                }
+                            )
                             Divider(
                                 modifier = Modifier.padding(bottom = 8.dp),
                                 color = colors.divider
                             )
                         }
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            if (showPicker) {
+                            if (isCalendar) {
                                 DatePickerCalendar(
-                                    screenSize = screenSize,
+                                    isScreenSmallHeight = isScreenSmallHeight,
                                     dateSelected = dateSelected,
                                     locale = locale,
                                     colors = colors,
@@ -137,7 +125,17 @@ fun DatePickerDialog(
                         }
                         Box(modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp)) {
+                            .padding(top = if (isScreenSmallHeight) 0.dp else 8.dp)) {
+                            if (isScreenSmallHeight) {
+                                DatePickerEditButton(
+                                    modifier = Modifier.align(Alignment.CenterStart),
+                                    color = colors.icon,
+                                    icon = if (isCalendar) Icons.Outlined.Edit else Icons.Outlined.CalendarToday,
+                                    onClick = {
+                                        isCalendar = !isCalendar
+                                    }
+                                )
+                            }
                             Row(modifier = Modifier.align(Alignment.CenterEnd)) {
                                 TextButton(
                                     colors = colors.negativeButton,
@@ -168,10 +166,53 @@ fun DatePickerDialog(
     }
 }
 
+@Composable
+internal fun DatePickerHeader(
+    dateSelected: LocalDate,
+    locale: Locale,
+    colors: DatePickerColors,
+    strings: DatePickerStrings,
+    isCalendar: Boolean,
+    onEdit: () -> Unit
+) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .align(Alignment.CenterStart),
+            text = dateSelected.toDateString(strings.titleDatePattern, locale),
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Normal,
+            color = colors.title
+        )
+        DatePickerEditButton(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            color = colors.icon,
+            icon = if (isCalendar) Icons.Outlined.Edit else Icons.Outlined.CalendarToday,
+            onClick = onEdit
+        )
+    }
+}
+
+@Composable
+internal fun DatePickerEditButton(modifier: Modifier, color: Color, icon: ImageVector, onClick: () -> Unit) {
+    IconButton(
+        modifier = modifier,
+        onClick = onClick,
+        content = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color
+            )
+        }
+    )
+}
+
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 internal fun DatePickerCalendar(
-    screenSize: Pair<Int, Int>,
+    isScreenSmallHeight: Boolean,
     dateSelected: LocalDate,
     locale: Locale,
     colors: DatePickerColors,
@@ -219,7 +260,7 @@ internal fun DatePickerCalendar(
     )
     if (showYearPicker) {
         DatePickerCalendarYearPicker(
-            screenSize = screenSize,
+            isScreenSmallHeight = isScreenSmallHeight,
             yearRange = yearRange,
             colors = colors,
             dateSelected = dateSelected,
@@ -233,7 +274,7 @@ internal fun DatePickerCalendar(
     }
     else {
         DatePickerCalendarBody(
-            screenSize = screenSize,
+            isScreenSmallHeight = isScreenSmallHeight,
             state = pagerState,
             pageCount = pageCount,
             startYear = yearRange.first,
@@ -285,7 +326,7 @@ internal fun DatePickerCalendarHeader(
                     Icon(
                         imageVector = Icons.Filled.NavigateBefore,
                         contentDescription = null,
-                        tint = colors.icon.copy(if (isShowYearPicker) 0.5f else 1f)
+                        tint = colors.icon.copy(if (isShowYearPicker) 0f else 1f)
                     )
                 }
             )
@@ -296,7 +337,7 @@ internal fun DatePickerCalendarHeader(
                     Icon(
                         imageVector = Icons.Filled.NavigateNext,
                         contentDescription = null,
-                        tint = colors.icon.copy(if (isShowYearPicker) 0.5f else 1f)
+                        tint = colors.icon.copy(if (isShowYearPicker) 0f else 1f)
                     )
                 }
             )
@@ -306,7 +347,7 @@ internal fun DatePickerCalendarHeader(
 
 @Composable
 internal fun DatePickerCalendarYearPicker(
-    screenSize: Pair<Int, Int>,
+    isScreenSmallHeight: Boolean,
     yearRange: IntRange,
     colors: DatePickerColors,
     dateSelected: LocalDate,
@@ -316,7 +357,7 @@ internal fun DatePickerCalendarYearPicker(
         initialFirstVisibleItemIndex = dateSelected.year - yearRange.first
     )
     LazyVerticalGrid(
-        modifier = Modifier.height(if (screenSize.second >= 560) 280.dp else 210.dp),
+        modifier = Modifier.height(if (!isScreenSmallHeight) 280.dp else 224.dp),
         state = state,
         columns = GridCells.Fixed(3),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -342,7 +383,7 @@ internal fun DatePickerCalendarYearPicker(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 internal fun DatePickerCalendarBody(
-    screenSize: Pair<Int, Int>,
+    isScreenSmallHeight: Boolean,
     state: PagerState,
     pageCount: Int,
     startYear: Int,
@@ -359,7 +400,7 @@ internal fun DatePickerCalendarBody(
                 Box(
                     modifier = Modifier
                         .weight(1F)
-                        .size(if (screenSize.second >= 560) 40.dp else 30.dp),
+                        .size(if (!isScreenSmallHeight) 40.dp else 32.dp),
                     contentAlignment = Alignment.Center) {
                     Text(
                         text = WeekFields.of(locale).firstDayOfWeek.plus(day.toLong()).getDisplayName(TextStyle.NARROW, locale),
@@ -381,7 +422,7 @@ internal fun DatePickerCalendarBody(
                 pageDate.getDatePickerMonthInfo(locale)
             }
             LazyVerticalGrid(
-                modifier = Modifier.height(if (screenSize.second >= 560) 240.dp else 180.dp),
+                modifier = Modifier.height(if (!isScreenSmallHeight) 240.dp else 192.dp),
                 userScrollEnabled = false,
                 columns = GridCells.Fixed(7),
                 content = {
@@ -395,7 +436,7 @@ internal fun DatePickerCalendarBody(
                                 selected = (pageDate.year == dateSelected.year && pageDate.month == dateSelected.month && dateSelected.dayOfMonth == (item + 1 - monthInfo.first)),
                                 today = (pageDate.year == dateNow.year && pageDate.month == dateNow.month && dateNow.dayOfMonth == (item + 1 - monthInfo.first)),
                                 text = (item + 1 - monthInfo.first).toString(),
-                                size = if (screenSize.second >= 560) 40.dp else 30.dp,
+                                size = if (!isScreenSmallHeight) 40.dp else 32.dp,
                                 onClick = {
                                     onClick(LocalDate.of(pageDate.year, pageDate.month, (item + 1 - monthInfo.first)))
                                 }
