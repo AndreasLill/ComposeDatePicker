@@ -5,6 +5,7 @@ As of jetpack compose material3 version 1.1.0, a date picker does not yet exist.
 This libary aims to add it until the official material date picker is released by google.
 
 # Instructions
+
 The library is published to the [jitpack.io](http://jitpack.io "jitpack.io") repository.
 To use this library you must add jitpack to your project gradle repositories.
 
@@ -20,6 +21,8 @@ dependencies {
     implementation 'com.github.AndreasLill:ComposeDatePicker:1.0.3'
 }
 ```
+
+[![](https://jitpack.io/v/AndreasLill/ComposeDatePicker.svg)](https://jitpack.io/#AndreasLill/ComposeDatePicker)
 
 # Usage
 
