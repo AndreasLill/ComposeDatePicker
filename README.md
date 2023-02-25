@@ -17,7 +17,7 @@ Then add the library to dependencies.
 
 ```gradle
 dependencies {
-    implementation 'com.github.AndreasLill:ComposeDatePicker:1.0.1'
+    implementation 'com.github.AndreasLill:ComposeDatePicker:1.0.2'
 }
 ```
 
