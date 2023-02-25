@@ -16,4 +16,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ComposeDatePicker"
 include ':app'
-include ':date-picker'
+include ':compose-date-picker'

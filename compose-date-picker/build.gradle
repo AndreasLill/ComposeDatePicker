@@ -55,7 +55,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 groupId = 'com.github.andreaslill'
-                artifactId = 'date-picker'
+                artifactId = 'compose-date-picker'
             }
         }
     }
